@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="5bd0ea06-5348-4083-8c85-8eb390c26608" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<configuration doc:name="Configuration" doc:id="81629e10-454e-4431-abcf-72ef904916aa" defaultErrorHandler-ref="for-each-testError_Handler"/>
+	<error-handler name="for-each-testError_Handler" doc:id="9da42b56-adac-46d5-b874-eb25e1ef30c6" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1c0ffce8-0e98-45a1-b2e6-b93ae0c1ce6d" >
+			<set-payload value='#["canecont"]' doc:name="Set Payload" doc:id="b3a307af-c4b0-4705-8f30-67ac82c664f0" />
+		</on-error-continue>
+	</error-handler>
+	<flow name="for-each-testFlow{APP_NAME}" doc:id="ccfb0746-a646-43cf-aa55-d1a86536ba47" >
+		<http:listener doc:name="{dsdmd}" doc:id="46b3cc57-d166-41e9-a9eb-3b1d289c165a" config-ref="HTTP_Listener_config" path="/"/>
+		<ee:transform doc:name="Transform Message" doc:id="a7cefc9c-6e04-40b9-96b5-6720fe34edef" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"aaa"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="9fad49b7-5a01-4536-ac82-6927836d05bb" name="for-each-testFlow1"/>
+	</flow>
+	<flow name="for-each-testFlow1" doc:id="d0d05dec-a06d-4dfc-bc61-aa8ab42ca21c" >
+		<validation:is-number doc:name="Is number" doc:id="d56f949f-503c-465c-9f3f-323b8dd4082b" value="#[payload]" message="ERROREEEE " numberType="INTEGER" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0cfff803-06cc-41cb-a395-8d2344a9a891" >
+				<set-payload value='#["caneFLOW"]' doc:name="Set Payload" doc:id="0d368f1d-d1c7-4f40-8c52-4efcf3479d0f" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
